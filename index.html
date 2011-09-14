@@ -97,10 +97,11 @@ circle.origin:hover {
                 scale = Math.min(xscale, yscale);
             proj.scale(scale);
             proj.translate(proj([-bounds0[0][0], 3-bounds0[1][1]]));
+            // center horizontally
             if(xscale > yscale) {
-                var d = (xscale / yscale);
-                console.log(d);
-                //cables.attr("transform", "translate(" + d + ", 0)");
+                var d = xscale * Math.abs(bounds[1][0] - bounds[0][0]) -
+                    yscale * Math.abs(bounds[1][0] - bounds[0][0]);
+                cables.attr("transform", "translate(" + d/2 + ", 0)");
             }
 
             world.selectAll("path")
