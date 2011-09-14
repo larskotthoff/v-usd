@@ -76,7 +76,34 @@ circle.origin:hover {
 
     <body>
         <script type="text/javascript">
-        var proj = d3.geo.mercator().scale(1).translate([0,0]),
+        d3.geo.equi = function() {
+          var scale = 500, translate = [480, 250];
+
+          function equi(coordinates) {
+            var x = coordinates[0] / 360,
+                y = -coordinates[1] / 360;
+            return [
+              scale * x + translate[0],
+              scale * y + translate[1]
+            ];
+          }
+
+          equi.scale = function(x) {
+            if (!arguments.length) return scale;
+            scale = +x;
+            return equi;
+          };
+
+          equi.translate = function(x) {
+            if (!arguments.length) return translate;
+            translate = [+x[0], +x[1]];
+            return equi;
+          };
+
+          return equi;
+        };
+
+        var proj = d3.geo.equi().scale(1).translate([0,0]),
             path = d3.geo.path().projection(proj),
             margin = 25,
             width = window.innerWidth - margin,
@@ -96,12 +123,17 @@ circle.origin:hover {
                 yscale = height/Math.abs(bounds[1][1] - bounds[0][1]),
                 scale = Math.min(xscale, yscale);
             proj.scale(scale);
-            proj.translate(proj([-bounds0[0][0], 3-bounds0[1][1]]));
-            // center horizontally
+            proj.translate(proj([-bounds0[0][0], -bounds0[1][1]]));
             if(xscale > yscale) {
+                // center horizontally
                 var d = xscale * Math.abs(bounds[1][0] - bounds[0][0]) -
                     yscale * Math.abs(bounds[1][0] - bounds[0][0]);
                 cables.attr("transform", "translate(" + d/2 + ", 0)");
+            } else {
+                // center vertically
+                var d = yscale * Math.abs(bounds[1][1] - bounds[0][1]) -
+                    xscale * Math.abs(bounds[1][1] - bounds[0][1]);
+                cables.attr("transform", "translate(0, " + d/2 + ")");
             }
 
             world.selectAll("path")
