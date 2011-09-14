@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>US diplomatic history</title>
+        <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.min.js"></script>
+        <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.geo.min.js"></script>
+        <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.layout.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+        <script src="https://raw.github.com/bigmlcom/tipsy/master/src/javascripts/jquery.tipsy.js" type="text/javascript"></script>
+        <style type="text/css"> 
+.tipsy {
+    padding: 5px;
+    font-weight: bold;
+    position: absolute;
+    z-index: 100000;
+}
+
+.tipsy-inner {
+    padding: 5px 8px 4px 8px;
+    background-color: #ceee5c;
+    color: #222;
+    max-width: 200px;
+    text-align: center;
+}
+
+.tipsy-inner {
+    border-radius: 3px;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+}
+
+.tipsy-arrow {
+    position: absolute;
+    width: 9px;
+    height: 5px;
+}
+
+.tipsy-sw .tipsy-arrow { bottom: 0; left: 10px; }
+.tipsy-se .tipsy-arrow { bottom: 0; right: 10px; }
+        </style>
+        <style type="text/css"> 
+body {
+  font: 12px sans;
+  text-rendering: optimizeLegibility;
+  background-color: #111;
+}
+text {
+  font: 10px sans;
+  fill: #222;
+  text-rendering: optimizeLegibility;
+}
+
+path {
+  stroke: #898;
+  fill: #111;
+}
+path.cable {
+  stroke: #dfff6d;
+  stroke-opacity: 0.7;
+  fill: none;
+}
+
+circle.origin {
+  stroke: #ceee5c;
+  stroke-width: 0.5;
+  fill: #dfff6d;
+  fill-opacity: 0.8;
+  shape-rendering: optimizeSpeed;
+}
+circle.origin:hover {
+  stroke: #fff;
+  stroke-width: 3;
+}
+        </style>
+    </head>
+
+    <body>
+        <script type="text/javascript">
+        var proj = d3.geo.mercator().scale(1).translate([0,0]),
+            path = d3.geo.path().projection(proj),
+            margin = 25,
+            width = window.innerWidth - margin,
+            height = window.innerHeight - margin,
+            dc = [ -77.036, 38.895 ],
+            svg = d3.select("body")
+                .append("svg:svg")
+                .attr("height", height)
+                .attr("width", width),
+            cables = svg.append("svg:g"),
+            world = cables.append("svg:g");
+        
+        d3.json("world.json", function(json) {
+            var bounds0 = d3.geo.bounds(json),
+                bounds = bounds0.map(proj),
+                xscale = width/Math.abs(bounds[1][0] - bounds[0][0]),
+                yscale = height/Math.abs(bounds[1][1] - bounds[0][1]),
+                scale = Math.min(xscale, yscale);
+            proj.scale(scale);
+            proj.translate(proj([-bounds0[0][0], 3-bounds0[1][1]]));
+            if(xscale > yscale) {
+                var d = (xscale / yscale);
+                console.log(d);
+                //cables.attr("transform", "translate(" + d + ", 0)");
+            }
+
+            world.selectAll("path")
+                .data(json.features)
+                .enter().append("svg:path")
+                .attr("d", path);
+
+            d3.json("cables.geojson", function(json) {
+                var max = d3.max($.map(json.features, function(d, i) {
+                            return d.properties.number;
+                        })),
+                    scale = d3.scale.linear().domain([0, max]).range([0.2, 1]),
+                    l = d3.svg.line().interpolate("bundle");
+
+                cables.selectAll("path.cable")
+                    .data(json.features)
+                    .enter().append("svg:path")
+                    .classed("cable", true)
+                    .attr("d", function(d) {
+                            var start = proj(d.geometry.coordinates),
+                                end = proj(dc),
+                                dx = end[0] - start[0],
+                                dy = end[1] - start[1],
+                                mid = [start[0] + dx / 2,
+                                       start[1] + dy / 2],
+                                dist = Math.sqrt(Math.pow(dx, 2) +
+                                           Math.pow(dy, 2)),
+                                diff = dist / 5,
+                                middx = dy * diff / dist,
+                                ddx = middx + ((Math.random()-0.5) * middx/3),
+                                middy = dx * diff / dist,
+                                ddy = middy + ((Math.random()-0.5) * middy/3),
+                                midp = [end[0] > start[0] ?
+                                    mid[0] + ddx : mid[0] - ddx,
+                                    end[1] > start[1] ?
+                                    mid[1] + ddy : mid[1] - ddy];
+                            return l([start, midp, end]);
+                        })
+                    .attr("stroke-width", function(d) {
+                            return scale(d.properties.number);
+                        });
+
+                cables.append("svg:g").selectAll("circle")
+                    .data(json.features)
+                    .enter().append("svg:circle")
+                    .classed("origin", true)
+                    .attr("r", 2.5)
+                    .attr("cx", function(d) {
+                            return proj(d.geometry.coordinates)[0];
+                        })
+                    .attr("cy", function(d) {
+                            return proj(d.geometry.coordinates)[1];
+                        })
+                    .append("title").text(function(d) {
+                        if(proj(d.geometry.coordinates)[0] > 200) {
+                            $(this.parentNode).tipsy({gravity:'se'});
+                        } else {
+                            $(this.parentNode).tipsy({gravity:'sw'});
+                        }
+                        var u = " cable" + (d.properties.number > 1 ? "s" : "");
+                        return d.properties.name + ": " +
+                            d.properties.number + u
+                    });
+            });
+        });
+        </script>
+    </body>
+</html>
