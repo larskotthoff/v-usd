@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>US diplomatic history</title>
+        <title>US Diplomacy 1966-2010</title>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.geo.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.layout.min.js"></script>
@@ -40,14 +40,21 @@
         </style>
         <style type="text/css"> 
 body {
-  font: 12px sans;
+  font-size: 12px;
+  font-family: "URW Gothic L", sans;
   text-rendering: optimizeLegibility;
   background-color: #111;
 }
 text {
-  font: 10px sans;
-  fill: #222;
+  font-size: 12px;
+  font-family: "URW Gothic L", sans;
+  fill: #dfff6d;
   text-rendering: optimizeLegibility;
+}
+text.title {
+  font-family: "Sawasdee", "URW Gothic L", sans;
+  font-weight: bold;
+  font-size: 36px;
 }
 
 path {
@@ -135,6 +142,13 @@ circle.origin:hover {
                     xscale * Math.abs(bounds[1][1] - bounds[0][1]);
                 cables.attr("transform", "translate(0, " + d/2 + ")");
             }
+
+            svg.append("svg:text")
+                .classed("title", true)
+                .attr("text-anchor", "start")
+                .attr("x", margin)
+                .attr("y", 2*margin)
+                .text("US Diplomacy 1966-2010");
 
             world.selectAll("path")
                 .data(json.features)
