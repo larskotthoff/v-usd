@@ -114,6 +114,20 @@ circle.origin:hover {
           return equi;
         };
 
+        function accessor(d) {
+            return function(e) { return e.p[d]; };
+        }
+
+        function decLabel(d) {
+            var s = 0;
+            if(d == "00") {
+                s = 2000;
+            } else {
+                s = parseInt("19" + d);
+            }
+            return s + "-" + (s + 9);
+        }
+
         var proj = d3.geo.equi(),
             path = d3.geo.path().projection(proj),
             margin = 25,
@@ -125,7 +139,9 @@ circle.origin:hover {
                 .attr("height", height)
                 .attr("width", width),
             cables = svg.append("svg:g"),
-            world = cables.append("svg:g");
+            world = cables.append("svg:g"),
+            decade = "00",
+            ad = accessor(decade);
         
         d3.json("world-dec.geojson", function(json) {
             var bounds0 = d3.geo.bounds(json),
@@ -152,7 +168,7 @@ circle.origin:hover {
                 .attr("text-anchor", "start")
                 .attr("x", margin)
                 .attr("y", 2*margin)
-                .text("US Diplomacy 2000-2009: visits & cables");
+                .text("US Diplomacy " + decLabel(decade) + ": visits & cables");
             svg.append("svg:text")
                 .attr("text-anchor", "start")
                 .attr("y", height-margin/2)
@@ -164,7 +180,7 @@ circle.origin:hover {
                 .text("Lars Kotthoff 2011");
 
             var vmax = d3.max($.map(json.features, function(d, i) {
-                        return d.p["90"];
+                        return ad(d);
                     })),
                 cscale = d3.scale.linear().domain([0, vmax])
                     .range(["#000", "#dfff6d"]);
@@ -173,7 +189,7 @@ circle.origin:hover {
                 .enter().append("svg:path")
                 .classed("world", true)
                 .attr("fill", function(d) {
-                        return cscale(d.p["90"]);
+                        return cscale(ad(d));
                     })
                 .attr("d", path)
                 .on("mouseover", function(d) {
@@ -186,20 +202,20 @@ circle.origin:hover {
                 .attr("from", 0)
                 .attr("to", 1);
             cs.append("title").text(function(d) {
-                    if(d.p["90"] > 0) {
+                    if(ad(d) > 0) {
                         if(proj(d.geometry.coordinates[0][0][0])[0] > width/2) {
                             $(this.parentNode).tipsy({gravity:'se'});
                         } else {
                             $(this.parentNode).tipsy({gravity:'sw'});
                         }
-                        var v = " visit" + (d.p["90"] > 1 ? "s" : "");
-                        return d.p.n + ": " + d.p["90"] + v;
+                        var v = " visit" + (ad(d) > 1 ? "s" : "");
+                        return d.p.n + ": " + ad(d) + v;
                     }
                 });
 
             d3.json("cables-dec.geojson", function(json) {
                 var cmax = d3.max($.map(json.features, function(d, i) {
-                            return d.p["90"];
+                            return ad(d);
                         })),
                     wscale = d3.scale.linear().domain([0, cmax])
                         .range([0.2, 5]),
@@ -210,7 +226,7 @@ circle.origin:hover {
                     .enter().append("svg:path")
                     .classed("cable", true)
                     .attr("d", function(d) {
-                        if(d.p["90"] > 0) {
+                        if(ad(d) > 0) {
                             var start = proj(d.geometry.coordinates),
                                 end = proj(dc),
                                 dx = end[0] - start[0],
@@ -239,7 +255,7 @@ circle.origin:hover {
                             return Math.round(this.getTotalLength());
                         })
                     .attr("stroke-width", function(d) {
-                            return wscale(d.p["90"]);
+                            return wscale(ad(d));
                         })
                     .append("svg:animate")
                     .attr("from", function(d) {
@@ -255,7 +271,7 @@ circle.origin:hover {
                     .enter().append("svg:circle")
                     .classed("origin", true)
                     .attr("r", function(d) {
-                            if(d.p["90"] > 0) {
+                            if(ad(d) > 0) {
                                 return 2;
                             }
                         })
@@ -266,14 +282,14 @@ circle.origin:hover {
                             return proj(d.geometry.coordinates)[1];
                         })
                     .append("title").text(function(d) {
-                        if(d.p["90"] > 0) {
+                        if(ad(d) > 0) {
                             if(proj(d.geometry.coordinates)[0] > width/2) {
                                 $(this.parentNode).tipsy({gravity:'se'});
                             } else {
                                 $(this.parentNode).tipsy({gravity:'sw'});
                             }
-                            var u = " cable" + (d.p["90"] > 1 ? "s" : "");
-                            return d.p.n + ": " + d.p["90"] + u;
+                            var u = " cable" + (ad(d) > 1 ? "s" : "");
+                            return d.p.n + ": " + ad(d) + u;
                         }
                     });
             });
