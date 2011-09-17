@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>US Diplomacy: visits & cables</title>
+        <title>US Diplomacy by decade: visits & cables</title>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.geo.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.layout.min.js"></script>
@@ -50,6 +50,12 @@ text {
   fill: #dfff6d;
   text-rendering: optimizeLegibility;
 }
+text.active {
+  font-weight: bold;
+}
+text.inactive {
+  fill: #898;
+}
 text.title {
   font-family: "Sawasdee", "URW Gothic L", sans;
   font-weight: bold;
@@ -66,7 +72,6 @@ path.world:hover {
 
 path.cable {
   stroke: #dfff6d;
-  stroke-opacity: 0.5;
   fill: none;
   stroke-linecap: round;
 }
@@ -128,6 +133,75 @@ circle.origin:hover {
             return s + "-" + (s + 9);
         }
 
+        function updateTitle(l) {
+            svg.select("text.title")
+                .text("US Diplomacy " + l + ": visits & cables");
+        }
+
+        function update(wjson, cjson, ad) {
+            var vmax = d3.max($.map(wjson.features, function(d, i) {
+                        return ad(d);
+                    })),
+                cscale = d3.scale.linear().domain([0, vmax])
+                    .range(["#000", "#dfff6d"]);
+            world.selectAll("path.world")
+                .attr("fill", function(d) {
+                        return cscale(ad(d));
+                    })
+                .select("title").text(function(d) {
+                    if(d.p.n != "United States") {
+                        if(proj(d.geometry.coordinates[0][0][0])[0] >
+                                width/2) {
+                            $(this.parentNode).tipsy({gravity:'se'});
+                        } else {
+                            $(this.parentNode).tipsy({gravity:'sw'});
+                        }
+                        var v = " visit" + (ad(d) == 1 ? "" : "s");
+                        return d.p.n + ": " + ad(d) + v;
+                    }
+                });
+
+            var cmax = d3.max($.map(cjson.features, function(d, i) {
+                        return ad(d);
+                    })),
+                wscale = d3.scale.linear().domain([0, cmax])
+                    .range([0.2, 5]);
+
+            cables.selectAll("path.cable")
+                .attr("stroke-width", function(d) {
+                        return wscale(ad(d));
+                    })
+                .attr("stroke-opacity", function(d) {
+                        if(ad(d) > 0) {
+                            return 0.5;
+                        } else {
+                            return 0;
+                        }
+                    });
+
+            cables.selectAll("circle.origin")
+                .attr("r", function(d) {
+                        if(ad(d) > 0) {
+                            return 2;
+                        }
+                    })
+                .attr("cx", function(d) {
+                        return proj(d.geometry.coordinates)[0];
+                    })
+                .attr("cy", function(d) {
+                        return proj(d.geometry.coordinates)[1];
+                    })
+                .select("title").text(function(d) {
+                    if(proj(d.geometry.coordinates)[0] > width/2) {
+                        $(this.parentNode).tipsy({gravity:'se'});
+                    } else {
+                        $(this.parentNode).tipsy({gravity:'sw'});
+                    }
+                    var u = " cable" + (ad(d) == 1 ? "" : "s");
+                    return d.p.n + ": " + ad(d) + u;
+                });
+        }
+
         var proj = d3.geo.equi(),
             path = d3.geo.path().projection(proj),
             margin = 25,
@@ -140,11 +214,12 @@ circle.origin:hover {
                 .attr("width", width),
             cables = svg.append("svg:g"),
             world = cables.append("svg:g"),
-            decade = "00",
-            ad = accessor(decade);
+            selector = svg.append("svg:g"),
+            decades = [ "00", "90", "80", "70" ],
+            dix = 0;
         
-        d3.json("world-dec.geojson", function(json) {
-            var bounds0 = d3.geo.bounds(json),
+        d3.json("world-dec.geojson", function(wjson) {
+            var bounds0 = d3.geo.bounds(wjson),
                 bounds = bounds0.map(proj),
                 xscale = width/Math.abs(bounds[1][0] - bounds[0][0]),
                 yscale = height/Math.abs(bounds[1][1] - bounds[0][1]),
@@ -167,8 +242,8 @@ circle.origin:hover {
                 .classed("title", true)
                 .attr("text-anchor", "start")
                 .attr("x", margin)
-                .attr("y", 2*margin)
-                .text("US Diplomacy " + decLabel(decade) + ": visits & cables");
+                .attr("y", 2*margin);
+            updateTitle(decLabel(decades[dix]));
             svg.append("svg:text")
                 .attr("text-anchor", "start")
                 .attr("y", height-margin/2)
@@ -179,54 +254,51 @@ circle.origin:hover {
                 .attr("y", height-margin/2)
                 .text("Lars Kotthoff 2011");
 
-            var vmax = d3.max($.map(json.features, function(d, i) {
-                        return ad(d);
-                    })),
-                cscale = d3.scale.linear().domain([0, vmax])
-                    .range(["#000", "#dfff6d"]);
-            cs = world.selectAll("path")
-                .data(json.features)
-                .enter().append("svg:path")
-                .classed("world", true)
-                .attr("fill", function(d) {
-                        return cscale(ad(d));
-                    })
-                .attr("d", path)
-                .on("mouseover", function(d) {
-                        var n = d3.select(this).node();
-                        n.parentNode.appendChild(n);
-                    });
-            cs.append("svg:animate")
-                .attr("attributeName", "fill-opacity")
-                .attr("dur", "2s")
-                .attr("from", 0)
-                .attr("to", 1);
-            cs.append("title").text(function(d) {
-                    if(ad(d) > 0) {
-                        if(proj(d.geometry.coordinates[0][0][0])[0] > width/2) {
-                            $(this.parentNode).tipsy({gravity:'se'});
-                        } else {
-                            $(this.parentNode).tipsy({gravity:'sw'});
-                        }
-                        var v = " visit" + (ad(d) > 1 ? "s" : "");
-                        return d.p.n + ": " + ad(d) + v;
-                    }
+            d3.json("cables-dec.geojson", function(cjson) {
+                $.each(decades, function(i, d) {
+                    selector.append("svg:text")
+                        .attr("text-anchor", "start")
+                        .attr("x", margin)
+                        .attr("y", height-((i+3)*margin))
+                        .attr("class", function(e) {
+                                if(i == dix) {
+                                    return "active";
+                                } else {
+                                    return "inactive";
+                                }
+                            })
+                        .on("click", function(e) {
+                                selector.select("text.active")
+                                    .attr("class", "inactive");
+                                d3.select(this).attr("class", "active");
+                                dix = i;
+                                updateTitle(decLabel(decades[dix]));
+                                update(wjson, cjson, accessor(decades[dix]));
+                            })
+                        .text(decLabel(d));
                 });
+                cs = world.selectAll("path.world")
+                    .data(wjson.features)
+                    .enter().append("svg:path")
+                    .classed("world", true)
+                    .attr("d", path)
+                    .on("mouseover", function(d) {
+                            var n = d3.select(this).node();
+                            n.parentNode.appendChild(n);
+                        });
+                cs.append("svg:animate")
+                    .attr("attributeName", "fill-opacity")
+                    .attr("dur", "2s")
+                    .attr("from", 0)
+                    .attr("to", 1);
+                cs.append("title");
 
-            d3.json("cables-dec.geojson", function(json) {
-                var cmax = d3.max($.map(json.features, function(d, i) {
-                            return ad(d);
-                        })),
-                    wscale = d3.scale.linear().domain([0, cmax])
-                        .range([0.2, 5]),
-                    l = d3.svg.line().interpolate("bundle");
-
+                var l = d3.svg.line().interpolate("bundle");
                 cables.selectAll("path.cable")
-                    .data(json.features)
+                    .data(cjson.features)
                     .enter().append("svg:path")
                     .classed("cable", true)
                     .attr("d", function(d) {
-                        if(ad(d) > 0) {
                             var start = proj(d.geometry.coordinates),
                                 end = proj(dc),
                                 dx = end[0] - start[0],
@@ -245,7 +317,6 @@ circle.origin:hover {
                                     end[1] > start[1] ?
                                     mid[1] + ddy : mid[1] - ddy];
                             return l([start, midp, end]);
-                        }
                         })
                     .attr("stroke-dasharray", function(d) {
                             var l = Math.round(this.getTotalLength());
@@ -253,9 +324,6 @@ circle.origin:hover {
                         })
                     .attr("stroke-dashoffset", function(d) {
                             return Math.round(this.getTotalLength());
-                        })
-                    .attr("stroke-width", function(d) {
-                            return wscale(ad(d));
                         })
                     .append("svg:animate")
                     .attr("from", function(d) {
@@ -266,32 +334,12 @@ circle.origin:hover {
                     .attr("fill", "freeze")
                     .attr("dur", "2s");
 
-                cables.append("svg:g").selectAll("circle")
-                    .data(json.features)
+                cables.append("svg:g").selectAll("circle.origin")
+                    .data(cjson.features)
                     .enter().append("svg:circle")
                     .classed("origin", true)
-                    .attr("r", function(d) {
-                            if(ad(d) > 0) {
-                                return 2;
-                            }
-                        })
-                    .attr("cx", function(d) {
-                            return proj(d.geometry.coordinates)[0];
-                        })
-                    .attr("cy", function(d) {
-                            return proj(d.geometry.coordinates)[1];
-                        })
-                    .append("title").text(function(d) {
-                        if(ad(d) > 0) {
-                            if(proj(d.geometry.coordinates)[0] > width/2) {
-                                $(this.parentNode).tipsy({gravity:'se'});
-                            } else {
-                                $(this.parentNode).tipsy({gravity:'sw'});
-                            }
-                            var u = " cable" + (ad(d) > 1 ? "s" : "");
-                            return d.p.n + ": " + ad(d) + u;
-                        }
-                    });
+                    .append("title");
+                update(wjson, cjson, accessor(decades[dix]));
             });
         });
         </script>
