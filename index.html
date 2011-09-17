@@ -149,17 +149,9 @@ circle.origin:hover {
                         return cscale(ad(d));
                     })
                 .select("title").text(function(d) {
-                    if(d.p.n != "United States") {
-                        if(proj(d.geometry.coordinates[0][0][0])[0] >
-                                width/2) {
-                            $(this.parentNode).tipsy({gravity:'se'});
-                        } else {
-                            $(this.parentNode).tipsy({gravity:'sw'});
-                        }
                         var v = " visit" + (ad(d) == 1 ? "" : "s");
                         return d.p.n + ": " + ad(d) + v;
-                    }
-                });
+                    });
 
             var cmax = d3.max($.map(cjson.features, function(d, i) {
                         return ad(d);
@@ -192,14 +184,9 @@ circle.origin:hover {
                         return proj(d.geometry.coordinates)[1];
                     })
                 .select("title").text(function(d) {
-                    if(proj(d.geometry.coordinates)[0] > width/2) {
-                        $(this.parentNode).tipsy({gravity:'se'});
-                    } else {
-                        $(this.parentNode).tipsy({gravity:'sw'});
-                    }
-                    var u = " cable" + (ad(d) == 1 ? "" : "s");
-                    return d.p.n + ": " + ad(d) + u;
-                });
+                        var u = " cable" + (ad(d) == 1 ? "" : "s");
+                        return d.p.n + ": " + ad(d) + u;
+                    });
         }
 
         var proj = d3.geo.equi(),
@@ -291,7 +278,16 @@ circle.origin:hover {
                     .attr("dur", "2s")
                     .attr("from", 0)
                     .attr("to", 1);
-                cs.append("title");
+                cs.append("title").text(function(d) {
+                    if(d.p.n != "United States") {
+                        if(proj(d.geometry.coordinates[0][0][0])[0] >
+                                width/2) {
+                            $(this.parentNode).tipsy({gravity:'se'});
+                        } else {
+                            $(this.parentNode).tipsy({gravity:'sw'});
+                        }
+                    }
+                });
 
                 var l = d3.svg.line().interpolate("bundle");
                 cables.selectAll("path.cable")
@@ -338,7 +334,13 @@ circle.origin:hover {
                     .data(cjson.features)
                     .enter().append("svg:circle")
                     .classed("origin", true)
-                    .append("title");
+                    .append("title").text(function(d) {
+                        if(proj(d.geometry.coordinates)[0] > width/2) {
+                            $(this.parentNode).tipsy({gravity:'se'});
+                        } else {
+                            $(this.parentNode).tipsy({gravity:'sw'});
+                        }
+                    });
                 update(wjson, cjson, accessor(decades[dix]));
             });
         });
