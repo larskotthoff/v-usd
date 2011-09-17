@@ -175,7 +175,11 @@ circle.origin:hover {
                 .attr("fill", function(d) {
                         return cscale(d.p.v);
                     })
-                .attr("d", path);
+                .attr("d", path)
+                .on("mouseover", function(d) {
+                        var n = d3.select(this).node();
+                        n.parentNode.appendChild(n);
+                    });
             cs.append("svg:animate")
                 .attr("attributeName", "fill-opacity")
                 .attr("dur", "2s")
