@@ -223,7 +223,7 @@ circle.origin:hover {
                         })
                     .attr("stroke-dasharray", function(d) {
                             var l = Math.round(this.getTotalLength());
-                            return l + "," + l;
+                            return l + " " + l;
                         })
                     .attr("stroke-dashoffset", function(d) {
                             return Math.round(this.getTotalLength());
