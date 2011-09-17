@@ -6,7 +6,7 @@
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.geo.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/mbostock/d3/master/d3.layout.min.js"></script>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-        <script src="https://raw.github.com/bigmlcom/tipsy/master/src/javascripts/jquery.tipsy.js" type="text/javascript"></script>
+        <script type="text/javascript" src="https://raw.github.com/bigmlcom/tipsy/master/src/javascripts/jquery.tipsy.js"></script>
         <style type="text/css"> 
 .tipsy {
   padding: 5px;
@@ -63,10 +63,12 @@ path.world:hover {
   stroke: #fff;
   stroke-width: 1;
 }
+
 path.cable {
   stroke: #dfff6d;
   stroke-opacity: 0.5;
   fill: none;
+  stroke-linecap: round;
 }
 
 circle.origin {
@@ -166,15 +168,21 @@ circle.origin:hover {
                     })),
                 cscale = d3.scale.linear().domain([0, vmax])
                     .range(["#000", "#dfff6d"]);
-            world.selectAll("path")
+            cs = world.selectAll("path")
                 .data(json.features)
                 .enter().append("svg:path")
                 .classed("world", true)
                 .attr("fill", function(d) {
                         return cscale(d.p.v);
                     })
-                .attr("d", path)
-                .append("title").text(function(d) {
+                .attr("d", path);
+            cs.append("svg:animate")
+                .attr("attributeName", "fill-opacity")
+                .attr("fill", "freeze")
+                .attr("dur", "2s")
+                .attr("from", 0)
+                .attr("to", 1);
+            cs.append("title").text(function(d) {
                     if(d.p.v) {
                         $(this.parentNode).tipsy({gravity:'se'});
                         var v = " visit" + (d.p.v > 1 ? "s" : "");
@@ -225,7 +233,7 @@ circle.origin:hover {
                     .attr("from", function(d) {
                             return Math.round(this.parentNode.getTotalLength());
                         })
-                    .attr("to", "0")
+                    .attr("to", 0)
                     .attr("attributeName", "stroke-dashoffset")
                     .attr("fill", "freeze")
                     .attr("dur", "2s");
@@ -234,7 +242,7 @@ circle.origin:hover {
                     .data(json.features)
                     .enter().append("svg:circle")
                     .classed("origin", true)
-                    .attr("r", 2.5)
+                    .attr("r", 2)
                     .attr("cx", function(d) {
                             return proj(d.geometry.coordinates)[0];
                         })
