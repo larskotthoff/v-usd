@@ -123,7 +123,7 @@ circle.origin:hover {
             cables = svg.append("svg:g"),
             world = cables.append("svg:g");
         
-        d3.json("world.json", function(json) {
+        d3.json("world.geojson", function(json) {
             var bounds0 = d3.geo.bounds(json),
                 bounds = bounds0.map(proj),
                 xscale = width/Math.abs(bounds[1][0] - bounds[0][0]),
