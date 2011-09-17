@@ -162,7 +162,7 @@ circle.origin:hover {
                 .text("Lars Kotthoff 2011");
 
             var vmax = d3.max($.map(json.features, function(d, i) {
-                        return d.properties.visits;
+                        return d.properties.v;
                     })),
                 cscale = d3.scale.linear().domain([0, vmax])
                     .range(["#000", "#dfff6d"]);
@@ -171,21 +171,21 @@ circle.origin:hover {
                 .enter().append("svg:path")
                 .classed("world", true)
                 .attr("fill", function(d) {
-                        return cscale(d.properties.visits);
+                        return cscale(d.properties.v);
                     })
                 .attr("d", path)
                 .append("title").text(function(d) {
-                    if(d.properties.visits) {
+                    if(d.properties.v) {
                         $(this.parentNode).tipsy({gravity:'se'});
-                        var v = " visit" + (d.properties.visits > 1 ? "s" : "");
-                        return d.properties.name + ": " +
-                            d.properties.visits + v;
+                        var v = " visit" + (d.properties.v > 1 ? "s" : "");
+                        return d.properties.n + ": " +
+                            d.properties.v + v;
                     }
                 });
 
             d3.json("cables.geojson", function(json) {
                 var cmax = d3.max($.map(json.features, function(d, i) {
-                            return d.properties.number;
+                            return d.properties.c;
                         })),
                     wscale = d3.scale.linear().domain([0, cmax])
                         .range([0.2, 1]),
@@ -220,12 +220,11 @@ circle.origin:hover {
                             return l + "," + l;
                         })
                     .attr("stroke-width", function(d) {
-                            return wscale(d.properties.number);
+                            return wscale(d.properties.c);
                         })
                     .append("svg:animate")
                     .attr("from", function(d) {
-                            var l = Math.round(this.parentNode.getTotalLength());
-                            return l;
+                            return Math.round(this.parentNode.getTotalLength());
                         })
                     .attr("to", "0")
                     .attr("attributeName", "stroke-dashoffset")
@@ -249,9 +248,9 @@ circle.origin:hover {
                         } else {
                             $(this.parentNode).tipsy({gravity:'sw'});
                         }
-                        var u = " cable" + (d.properties.number > 1 ? "s" : "");
-                        return d.properties.name + ": " +
-                            d.properties.number + u;
+                        var u = " cable" + (d.properties.c > 1 ? "s" : "");
+                        return d.properties.n + ": " +
+                            d.properties.c + u;
                     });
             });
         });
