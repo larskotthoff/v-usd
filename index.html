@@ -219,10 +219,6 @@ circle.origin:hover {
                             var l = Math.round(this.getTotalLength());
                             return l + "," + l;
                         })
-                    .attr("stroke-dashoffset", function(d) {
-                            var l = Math.round(this.getTotalLength());
-                            return l;
-                        })
                     .attr("stroke-width", function(d) {
                             return wscale(d.properties.number);
                         })
