@@ -9,30 +9,32 @@
         <script src="https://raw.github.com/bigmlcom/tipsy/master/src/javascripts/jquery.tipsy.js" type="text/javascript"></script>
         <style type="text/css"> 
 .tipsy {
-    padding: 5px;
-    font-weight: bold;
-    position: absolute;
-    z-index: 100000;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 12px;
+  font-family: "URW Gothic L", sans;
+  position: absolute;
+  z-index: 100000;
 }
 
 .tipsy-inner {
-    padding: 5px 8px 4px 8px;
-    background-color: #ceee5c;
-    color: #222;
-    max-width: 200px;
-    text-align: center;
+  padding: 5px 8px 4px 8px;
+  background-color: #ceee5c;
+  color: #222;
+  max-width: 200px;
+  text-align: center;
 }
 
 .tipsy-inner {
-    border-radius: 3px;
-    -moz-border-radius:3px;
-    -webkit-border-radius:3px;
+  border-radius: 3px;
+  -moz-border-radius:3px;
+  -webkit-border-radius:3px;
 }
 
 .tipsy-arrow {
-    position: absolute;
-    width: 9px;
-    height: 5px;
+  position: absolute;
+  width: 9px;
+  height: 5px;
 }
 
 .tipsy-sw .tipsy-arrow { bottom: 0; left: 10px; }
@@ -40,9 +42,6 @@
         </style>
         <style type="text/css"> 
 body {
-  font-size: 12px;
-  font-family: "URW Gothic L", sans;
-  text-rendering: optimizeLegibility;
   background-color: #111;
 }
 text {
@@ -57,9 +56,12 @@ text.title {
   font-size: 36px;
 }
 
-path {
+path.world {
   stroke: #898;
-  fill: #111;
+}
+path.world:hover {
+  stroke: #fff;
+  stroke-width: 1;
 }
 path.cable {
   stroke: #dfff6d;
@@ -148,18 +150,45 @@ circle.origin:hover {
                 .attr("text-anchor", "start")
                 .attr("x", margin)
                 .attr("y", 2*margin)
-                .text("US Diplomacy 1966-2010");
+                .text("US Diplomacy 1966-2010: visits & cables");
+            svg.append("svg:text")
+                .attr("text-anchor", "start")
+                .attr("y", height-margin/2)
+                .text("Visits by the president or secretary of state or by a foreign dignitary to the US. Data taken from http://www.state.gov. Cable data courtesy of WikiLeaks.");
+            svg.append("svg:text")
+                .attr("text-anchor", "end")
+                .attr("x", width)
+                .attr("y", height-margin/2)
+                .text("Map by Lars Kotthoff 2011");
 
+            var vmax = d3.max($.map(json.features, function(d, i) {
+                        return d.properties.visits;
+                    })),
+                cscale = d3.scale.linear().domain([0, vmax])
+                    .range(["#000", "#dfff6d"]);
             world.selectAll("path")
                 .data(json.features)
                 .enter().append("svg:path")
-                .attr("d", path);
+                .classed("world", true)
+                .attr("fill", function(d) {
+                        return cscale(d.properties.visits);
+                    })
+                .attr("d", path)
+                .append("title").text(function(d) {
+                    if(d.properties.visits) {
+                        $(this.parentNode).tipsy({gravity:'se'});
+                        var v = " visit" + (d.properties.visits > 1 ? "s" : "");
+                        return d.properties.name + ": " +
+                            d.properties.visits + v;
+                    }
+                });
 
             d3.json("cables.geojson", function(json) {
-                var max = d3.max($.map(json.features, function(d, i) {
+                var cmax = d3.max($.map(json.features, function(d, i) {
                             return d.properties.number;
                         })),
-                    scale = d3.scale.linear().domain([0, max]).range([0.2, 1]),
+                    wscale = d3.scale.linear().domain([0, cmax])
+                        .range([0.2, 1]),
                     l = d3.svg.line().interpolate("bundle");
 
                 cables.selectAll("path.cable")
@@ -187,7 +216,7 @@ circle.origin:hover {
                             return l([start, midp, end]);
                         })
                     .attr("stroke-width", function(d) {
-                            return scale(d.properties.number);
+                            return wscale(d.properties.number);
                         });
 
                 cables.append("svg:g").selectAll("circle")
@@ -209,7 +238,7 @@ circle.origin:hover {
                         }
                         var u = " cable" + (d.properties.number > 1 ? "s" : "");
                         return d.properties.name + ": " +
-                            d.properties.number + u
+                            d.properties.number + u;
                     });
             });
         });
