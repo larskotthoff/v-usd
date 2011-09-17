@@ -65,7 +65,7 @@ path.world:hover {
 }
 path.cable {
   stroke: #dfff6d;
-  stroke-opacity: 0.7;
+  stroke-opacity: 0.5;
   fill: none;
 }
 
@@ -215,9 +215,26 @@ circle.origin:hover {
                                     mid[1] + ddy : mid[1] - ddy];
                             return l([start, midp, end]);
                         })
+                    .attr("stroke-dasharray", function(d) {
+                            var l = Math.round(this.getTotalLength());
+                            return l + "," + l;
+                        })
+                    .attr("stroke-dashoffset", function(d) {
+                            var l = Math.round(this.getTotalLength());
+                            return l;
+                        })
                     .attr("stroke-width", function(d) {
                             return wscale(d.properties.number);
-                        });
+                        })
+                    .append("svg:animate")
+                    .attr("from", function(d) {
+                            var l = Math.round(this.parentNode.getTotalLength());
+                            return l;
+                        })
+                    .attr("to", "0")
+                    .attr("attributeName", "stroke-dashoffset")
+                    .attr("fill", "freeze")
+                    .attr("dur", "3s");
 
                 cables.append("svg:g").selectAll("circle")
                     .data(json.features)
