@@ -12,8 +12,8 @@ f.each { |l|
 data = JSON.parse(STDIN.read)
 
 data["features"].each { |f|
-    if visits.has_key?(f["properties"]["name"])
-        f["properties"]["visits"] = visits[f["properties"]["name"]]
+    if visits.has_key?(f["p"]["n"])
+        f["p"]["v"] = visits[f["p"]["n"]]
     end
 }
 
