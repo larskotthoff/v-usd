@@ -88,7 +88,7 @@ circle.origin:hover {
     <body>
         <script type="text/javascript">
         d3.geo.equi = function() {
-          var scale = 500, translate = [480, 250];
+          var scale = 1, translate = [0, 0];
 
           function equi(coordinates) {
             var x = coordinates[0] / 360,
@@ -114,7 +114,7 @@ circle.origin:hover {
           return equi;
         };
 
-        var proj = d3.geo.equi().scale(1).translate([0,0]),
+        var proj = d3.geo.equi(),
             path = d3.geo.path().projection(proj),
             margin = 25,
             width = window.innerWidth - margin,
@@ -178,7 +178,6 @@ circle.origin:hover {
                 .attr("d", path);
             cs.append("svg:animate")
                 .attr("attributeName", "fill-opacity")
-                .attr("fill", "freeze")
                 .attr("dur", "2s")
                 .attr("from", 0)
                 .attr("to", 1);
@@ -225,6 +224,9 @@ circle.origin:hover {
                     .attr("stroke-dasharray", function(d) {
                             var l = Math.round(this.getTotalLength());
                             return l + "," + l;
+                        })
+                    .attr("stroke-dashoffset", function(d) {
+                            return Math.round(this.getTotalLength());
                         })
                     .attr("stroke-width", function(d) {
                             return wscale(d.p.c);
