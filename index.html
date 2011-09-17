@@ -164,7 +164,7 @@ circle.origin:hover {
                 .text("Lars Kotthoff 2011");
 
             var vmax = d3.max($.map(json.features, function(d, i) {
-                        return d.p["00"];
+                        return d.p["90"];
                     })),
                 cscale = d3.scale.linear().domain([0, vmax])
                     .range(["#000", "#dfff6d"]);
@@ -173,7 +173,7 @@ circle.origin:hover {
                 .enter().append("svg:path")
                 .classed("world", true)
                 .attr("fill", function(d) {
-                        return cscale(d.p["00"]);
+                        return cscale(d.p["90"]);
                     })
                 .attr("d", path)
                 .on("mouseover", function(d) {
@@ -186,16 +186,20 @@ circle.origin:hover {
                 .attr("from", 0)
                 .attr("to", 1);
             cs.append("title").text(function(d) {
-                    if(d.p["00"] > 0) {
-                        $(this.parentNode).tipsy({gravity:'se'});
-                        var v = " visit" + (d.p["00"] > 1 ? "s" : "");
-                        return d.p.n + ": " + d.p["00"] + v;
+                    if(d.p["90"] > 0) {
+                        if(proj(d.geometry.coordinates[0][0][0])[0] > width/2) {
+                            $(this.parentNode).tipsy({gravity:'se'});
+                        } else {
+                            $(this.parentNode).tipsy({gravity:'sw'});
+                        }
+                        var v = " visit" + (d.p["90"] > 1 ? "s" : "");
+                        return d.p.n + ": " + d.p["90"] + v;
                     }
                 });
 
             d3.json("cables-dec.geojson", function(json) {
                 var cmax = d3.max($.map(json.features, function(d, i) {
-                            return d.p["00"];
+                            return d.p["90"];
                         })),
                     wscale = d3.scale.linear().domain([0, cmax])
                         .range([0.2, 5]),
@@ -206,6 +210,7 @@ circle.origin:hover {
                     .enter().append("svg:path")
                     .classed("cable", true)
                     .attr("d", function(d) {
+                        if(d.p["90"] > 0) {
                             var start = proj(d.geometry.coordinates),
                                 end = proj(dc),
                                 dx = end[0] - start[0],
@@ -224,6 +229,7 @@ circle.origin:hover {
                                     end[1] > start[1] ?
                                     mid[1] + ddy : mid[1] - ddy];
                             return l([start, midp, end]);
+                        }
                         })
                     .attr("stroke-dasharray", function(d) {
                             var l = Math.round(this.getTotalLength());
@@ -233,7 +239,7 @@ circle.origin:hover {
                             return Math.round(this.getTotalLength());
                         })
                     .attr("stroke-width", function(d) {
-                            return wscale(d.p["00"]);
+                            return wscale(d.p["90"]);
                         })
                     .append("svg:animate")
                     .attr("from", function(d) {
@@ -249,7 +255,7 @@ circle.origin:hover {
                     .enter().append("svg:circle")
                     .classed("origin", true)
                     .attr("r", function(d) {
-                            if(d.p["00"] > 0) {
+                            if(d.p["90"] > 0) {
                                 return 2;
                             }
                         })
@@ -260,14 +266,14 @@ circle.origin:hover {
                             return proj(d.geometry.coordinates)[1];
                         })
                     .append("title").text(function(d) {
-                        if(d.p["00"] > 0) {
-                            if(proj(d.geometry.coordinates)[0] > 200) {
+                        if(d.p["90"] > 0) {
+                            if(proj(d.geometry.coordinates)[0] > width/2) {
                                 $(this.parentNode).tipsy({gravity:'se'});
                             } else {
                                 $(this.parentNode).tipsy({gravity:'sw'});
                             }
-                            var u = " cable" + (d.p["00"] > 1 ? "s" : "");
-                            return d.p.n + ": " + d.p["00"] + u;
+                            var u = " cable" + (d.p["90"] > 1 ? "s" : "");
+                            return d.p.n + ": " + d.p["90"] + u;
                         }
                     });
             });
