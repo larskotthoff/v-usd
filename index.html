@@ -145,6 +145,7 @@ circle.origin:hover {
                 cscale = d3.scale.linear().domain([0, vmax])
                     .range(["#000", "#dfff6d"]);
             world.selectAll("path.world")
+                .transition().duration(500)
                 .attr("fill", function(d) {
                         return cscale(ad(d));
                     })
@@ -160,6 +161,7 @@ circle.origin:hover {
                     .range([0.2, 5]);
 
             cables.selectAll("path.cable")
+                .transition().duration(500)
                 .attr("stroke-width", function(d) {
                         return wscale(ad(d));
                     })
@@ -172,6 +174,7 @@ circle.origin:hover {
                     });
 
             cables.selectAll("circle.origin")
+                .transition().duration(500)
                 .attr("r", function(d) {
                         if(ad(d) > 0) {
                             return 2;
