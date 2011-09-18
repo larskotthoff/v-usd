@@ -149,7 +149,7 @@ circle.origin:hover {
                 .attr("fill", function(d) {
                         return cscale(ad(d));
                     })
-                .select("title").text(function(d) {
+                .select("original-title").text(function(d) {
                         var v = " visit" + (ad(d) == 1 ? "" : "s");
                         return d.p.n + ": " + ad(d) + v;
                     });
@@ -186,7 +186,7 @@ circle.origin:hover {
                 .attr("cy", function(d) {
                         return proj(d.geometry.coordinates)[1];
                     })
-                .select("title").text(function(d) {
+                .select("original-title").text(function(d) {
                         var u = " cable" + (ad(d) == 1 ? "" : "s");
                         return d.p.n + ": " + ad(d) + u;
                     });
@@ -281,13 +281,13 @@ circle.origin:hover {
                     .attr("dur", "2s")
                     .attr("from", 0)
                     .attr("to", 1);
-                cs.append("title").text(function(d) {
+                cs.append("original-title").text(function(d) {
                     if(d.p.n != "United States") {
                         if(proj(d.geometry.coordinates[0][0][0])[0] >
                                 width/2) {
-                            $(this.parentNode).tipsy({gravity:'se'});
+                            $(this).parent().tipsy({gravity:'se'});
                         } else {
-                            $(this.parentNode).tipsy({gravity:'sw'});
+                            $(this).parent().tipsy({gravity:'sw'});
                         }
                     }
                 });
@@ -337,11 +337,11 @@ circle.origin:hover {
                     .data(cjson.features)
                     .enter().append("svg:circle")
                     .classed("origin", true)
-                    .append("title").text(function(d) {
+                    .append("original-title").text(function(d) {
                         if(proj(d.geometry.coordinates)[0] > width/2) {
-                            $(this.parentNode).tipsy({gravity:'se'});
+                            $(this).parent().tipsy({gravity:'se'});
                         } else {
-                            $(this.parentNode).tipsy({gravity:'sw'});
+                            $(this).parent().tipsy({gravity:'sw'});
                         }
                     });
                 update(wjson, cjson, accessor(decades[dix]));
