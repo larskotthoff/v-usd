@@ -65,7 +65,11 @@ text.title {
 path.world {
   stroke: #898;
 }
-path.world:hover {
+path.worldoverlay {
+  stroke: none;
+  fill-opacity: 0;
+}
+path.worldoverlay:hover {
   stroke: #fff;
   stroke-width: 1;
 }
@@ -147,8 +151,9 @@ circle.origin:hover {
                 .transition().duration(500)
                 .attr("fill", function(d) {
                         return cscale(ad(d));
-                    })
-                .select("original-title").text(function(d) {
+                    });
+            worldo.selectAll("original-title")
+                .text(function(d) {
                         var v = " visit" + (ad(d) == 1 ? "" : "s");
                         return d.p.n + ": " + ad(d) + v;
                     });
@@ -202,7 +207,7 @@ circle.origin:hover {
                 .attr("height", height)
                 .attr("width", width),
             cables = svg.append("svg:g"),
-            world = cables.append("svg:g"),
+            world = cables.append("svg:g"), worldo,
             selector = svg.append("svg:g"),
             decades = [ "00", "90", "80", "70" ],
             dix = 0;
@@ -266,26 +271,16 @@ circle.origin:hover {
                             })
                         .text(decLabel(d));
                 });
-                cs = world.selectAll("path.world")
+                world.selectAll("path.world")
                     .data(wjson.features)
                     .enter().append("svg:path")
                     .classed("world", true)
-                    .attr("d", path);
-                cs.append("svg:animate")
+                    .attr("d", path)
+                    .append("svg:animate")
                     .attr("attributeName", "fill-opacity")
                     .attr("dur", "2s")
                     .attr("from", 0)
                     .attr("to", 1);
-                cs.append("original-title").text(function(d) {
-                    if(d.p.n != "United States") {
-                        if(proj(d.geometry.coordinates[0][0][0])[0] >
-                                width/2) {
-                            $(this).parent().tipsy({gravity:'se'});
-                        } else {
-                            $(this).parent().tipsy({gravity:'sw'});
-                        }
-                    }
-                });
 
                 var l = d3.svg.line().interpolate("bundle");
                 cables.selectAll("path.cable")
@@ -327,6 +322,23 @@ circle.origin:hover {
                     .attr("attributeName", "stroke-dashoffset")
                     .attr("fill", "freeze")
                     .attr("dur", "2s");
+
+                worldo = cables.append("svg:g");
+                worldo.selectAll("path.worldoverlay")
+                    .data(wjson.features)
+                    .enter().append("svg:path")
+                    .classed("worldoverlay", true)
+                    .attr("d", path)
+                    .append("original-title").text(function(d) {
+                        if(d.p.n != "United States") {
+                            if(proj(d.geometry.coordinates[0][0][0])[0] >
+                                    width/2) {
+                                $(this).parent().tipsy({gravity:'se'});
+                            } else {
+                                $(this).parent().tipsy({gravity:'sw'});
+                            }
+                        }
+                    });
 
                 cables.append("svg:g").selectAll("circle.origin")
                     .data(cjson.features)
