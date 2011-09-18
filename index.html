@@ -81,7 +81,6 @@ circle.origin {
   stroke-width: 0.5;
   fill: #dfff6d;
   fill-opacity: 0.8;
-  shape-rendering: optimizeSpeed;
 }
 circle.origin:hover {
   stroke: #fff;
@@ -271,11 +270,7 @@ circle.origin:hover {
                     .data(wjson.features)
                     .enter().append("svg:path")
                     .classed("world", true)
-                    .attr("d", path)
-                    .on("mouseover", function(d) {
-                            var n = d3.select(this).node();
-                            n.parentNode.appendChild(n);
-                        });
+                    .attr("d", path);
                 cs.append("svg:animate")
                     .attr("attributeName", "fill-opacity")
                     .attr("dur", "2s")
