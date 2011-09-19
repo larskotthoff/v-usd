@@ -304,7 +304,7 @@ circle.origin:hover {
                             return l + " " + l;
                         })
                     .attr("stroke-dashoffset", function(d) {
-                            return Math.round(this.getTotalLength());
+                            return 0;
                         })
                     .append("svg:animate")
                     .attr("from", function(d) {
