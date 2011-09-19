@@ -141,8 +141,10 @@ circle.origin:hover {
                 .text("US Diplomacy " + l + ": visits & cables");
         }
 
-        function update(wjson, cjson, ad) {
-            var vmax = d3.max($.map(wjson.features, function(d, i) {
+        function update(wjson, cjson, decade) {
+            updateTitle(decLabel(decade));
+            var ad = accessor(decade),
+                vmax = d3.max($.map(wjson.features, function(d, i) {
                         return ad(d);
                     })),
                 cscale = d3.scale.linear().domain([0, vmax])
@@ -237,7 +239,6 @@ circle.origin:hover {
                 .attr("text-anchor", "start")
                 .attr("x", margin)
                 .attr("y", 2*margin);
-            updateTitle(decLabel(decades[dix]));
             svg.append("svg:text")
                 .attr("text-anchor", "start")
                 .attr("y", height-margin/2)
@@ -266,8 +267,7 @@ circle.origin:hover {
                                     .attr("class", "inactive");
                                 d3.select(this).attr("class", "active");
                                 dix = i;
-                                updateTitle(decLabel(decades[dix]));
-                                update(wjson, cjson, accessor(decades[dix]));
+                                update(wjson, cjson, decades[dix]);
                             })
                         .text(decLabel(d));
                 });
@@ -351,7 +351,7 @@ circle.origin:hover {
                             $(this).parent().tipsy({gravity:'sw'});
                         }
                     });
-                update(wjson, cjson, accessor(decades[dix]));
+                update(wjson, cjson, decades[dix]);
             });
         });
         </script>
