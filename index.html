@@ -136,13 +136,9 @@ circle.origin:hover {
             return s + "-" + (s + 9);
         }
 
-        function updateTitle(l) {
-            svg.select("text.title")
-                .text("US Diplomacy " + l + ": visits & cables");
-        }
-
         function update(wjson, cjson, decade) {
-            updateTitle(decLabel(decade));
+            svg.select("text.title")
+                .text("US Diplomacy " + decLabel(decade) + ": visits & cables");
             var ad = accessor(decade),
                 vmax = d3.max($.map(wjson.features, function(d, i) {
                         return ad(d);
@@ -256,11 +252,7 @@ circle.origin:hover {
                         .attr("x", margin)
                         .attr("y", height-((i+3)*margin))
                         .attr("class", function(e) {
-                                if(i == dix) {
-                                    return "active";
-                                } else {
-                                    return "inactive";
-                                }
+                                return i == dix ? "active" : "inactive";
                             })
                         .on("click", function(e) {
                                 selector.select("text.active")
