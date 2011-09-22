@@ -95,33 +95,6 @@ circle.origin:hover {
 
     <body>
         <script type="text/javascript">
-        d3.geo.equi = function() {
-          var scale = 1, translate = [0, 0];
-
-          function equi(coordinates) {
-            var x = coordinates[0] / 360,
-                y = -coordinates[1] / 360;
-            return [
-              scale * x + translate[0],
-              scale * y + translate[1]
-            ];
-          }
-
-          equi.scale = function(x) {
-            if (!arguments.length) return scale;
-            scale = +x;
-            return equi;
-          };
-
-          equi.translate = function(x) {
-            if (!arguments.length) return translate;
-            translate = [+x[0], +x[1]];
-            return equi;
-          };
-
-          return equi;
-        };
-
         function accessor(d) {
             return function(e) { return e.p[d]; };
         }
@@ -194,7 +167,7 @@ circle.origin:hover {
                     });
         }
 
-        var proj = d3.geo.equi(),
+        var proj = d3.geo.equirectangular().scale(1).translate([0,0]),
             path = d3.geo.path().projection(proj),
             margin = 25,
             width = window.innerWidth - margin,
